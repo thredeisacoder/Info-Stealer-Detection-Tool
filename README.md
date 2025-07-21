@@ -1,4 +1,4 @@
-# 🔒 Info Stealer Detection Tool
+<div align="center"><h1>🔒 Info Stealer Detection Tool</h1></div>
 
 <div align="center">
 
