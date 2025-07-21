@@ -1,7 +1,7 @@
 {
   "name": "info-stealer-detection-tool",
   "version": "1.0.0",
-  "description": "Tool để kiểm tra thông tin bị đánh cắp từ Hudson Rock API",
+  "description": "Info Stealer Detection Tool",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
@@ -13,7 +13,7 @@
     "hudson-rock",
     "osint"
   ],
-  "author": "Your Name",
+  "author": "Threde Nolan",
   "license": "MIT",
   "dependencies": {
     "express": "^4.18.2",
