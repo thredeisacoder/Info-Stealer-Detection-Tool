@@ -1,0 +1,30 @@
+{
+  "name": "info-stealer-detection-tool",
+  "version": "1.0.0",
+  "description": "Tool để kiểm tra thông tin bị đánh cắp từ Hudson Rock API",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "keywords": [
+    "cybersecurity",
+    "info-stealer",
+    "hudson-rock",
+    "osint"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "axios": "^1.6.0",
+    "helmet": "^7.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+} 
