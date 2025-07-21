@@ -66,7 +66,7 @@ Info-Stealer-Detection-Tool/
 ├── 📂 src/                 # Backend source code
 │   └── server.js           # Express.js server
 ├── 📂 config/              # Configuration files
-│   └── security.js         # API endpoint configuration
+│   └── security.js         # Configuration
 ├── 📂 docs/                # Documentation
 │   ├── SETUP-GUIDE.md      # Installation guide
 ├── package.json            # Project dependencies
