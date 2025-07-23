@@ -97,7 +97,8 @@ class SecurityModule {
         return {
             base: baseUrl,
             email: '/search-by-email',
-            username: '/search-by-username'
+            username: '/search-by-username',
+            domain: '/search-by-domain'
         };
     }
 
@@ -145,6 +146,8 @@ class SecurityModule {
                 return baseUrl + endpoints.email;
             case 'username':
                 return baseUrl + endpoints.username;
+            case 'domain':
+                return baseUrl + endpoints.domain;
             default:
                 // Return decoy URL for invalid requests
                 return 'https://httpbin.org/status/404';

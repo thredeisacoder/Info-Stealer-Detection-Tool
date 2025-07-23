@@ -146,6 +146,61 @@ app.get('/api/search-by-username', async (req, res) => {
     }
 });
 
+// Search by domain
+app.get('/api/search-by-domain', async (req, res) => {
+    try {
+        const { domain } = req.query;
+        
+        if (!domain) {
+            return res.status(400).json({
+                error: 'Domain parameter is required'
+            });
+        }
+
+        // Validate domain format
+        const domainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
+        if (!domainRegex.test(domain)) {
+            return res.status(400).json({
+                error: 'Invalid domain format'
+            });
+        }
+
+        console.log(`Searching for domain: ${domain}`);
+
+        const response = await axios.get(securityModule.generateSecureUrl('domain'), {
+            params: { domain },
+            headers: {
+                'Accept': 'application/json',
+                'User-Agent': 'Info-Stealer-Detection-Tool/1.0'
+            },
+            timeout: 30000 // 30 seconds timeout
+        });
+
+        res.json(response.data);
+
+    } catch (error) {
+        console.error('Error searching by domain:', error.message);
+        
+        if (error.response) {
+            // API returned an error response
+            res.status(error.response.status).json({
+                error: error.response.data?.message || 'API Error',
+                status: error.response.status
+            });
+        } else if (error.code === 'ECONNABORTED') {
+            // Timeout error
+            res.status(408).json({
+                error: 'Request timeout. Please try again.'
+            });
+        } else {
+            // Network or other error
+            res.status(500).json({
+                error: 'Failed to connect to Hudson Rock API'
+            });
+        }
+    }
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
     res.json({
@@ -180,6 +235,7 @@ app.listen(PORT, () => {
     console.log('Available endpoints:');
     console.log(`  GET  /api/search-by-email?email=<email>`);
     console.log(`  GET  /api/search-by-username?username=<username>`);
+    console.log(`  GET  /api/search-by-domain?domain=<domain>`);
     console.log(`  GET  /api/health`);
     console.log('');
     console.log('Press Ctrl+C to stop the server');

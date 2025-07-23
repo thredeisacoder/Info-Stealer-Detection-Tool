@@ -27,33 +27,56 @@
                         <input 
                             type="text" 
                             id="searchInput" 
-                            placeholder="root@cybersec:~$ enter_target_email_or_username..."
+                            placeholder="root@cybersec:~$ enter_target [email@domain.com | username | domain.com]..."
                             autocomplete="off"
                         >
                         <button type="button" id="searchBtn" class="search-btn">
-                            <span class="btn-text">[EXECUTE]</span>
-                            <i class="fas fa-play btn-icon"></i>
+                            <span class="btn-text">[STANDBY]</span>
+                            <i class="fas fa-power-off btn-icon"></i>
                         </button>
                     </div>
                     <div class="search-hints">
-                        <span class="hint">
-                            <i class="fas fa-info-circle"></i>
-                            PROTOCOL: email@domain.com || username_target
-                        </span>
+                        <div class="hint-group">
+                            <span class="hint email-hint">
+                                <i class="fas fa-envelope"></i>
+                                EMAIL: user@example.com
+                            </span>
+                            <span class="hint username-hint">
+                                <i class="fas fa-user"></i>
+                                USERNAME: johndoe123
+                            </span>
+                            <span class="hint domain-hint">
+                                <i class="fas fa-globe"></i>
+                                DOMAIN: example.com
+                            </span>
+                        </div>
+                        <div class="scan-status">
+                            <span class="status-indicator">
+                                <i class="fas fa-shield-alt"></i>
+                                SYSTEM_STATUS: [READY_FOR_SCAN]
+                            </span>
+                        </div>
                     </div>
                 </div>
 
                 <div id="loadingSpinner" class="loading-spinner hidden">
                     <div class="spinner"></div>
-                    <p>▸ ACCESSING DARK WEB DATABASES...</p>
-                    <p>▸ CROSS-REFERENCING STEALER LOGS...</p>
-                    <p>▸ ANALYZING THREAT INTELLIGENCE...</p>
+                    <p>▸ INITIALIZING DARK WEB CRAWLERS...</p>
+                    <p>▸ CONNECTING TO STEALER DATABASES...</p>
+                    <p>▸ DECRYPTING MALWARE LOGS...</p>
+                    <p>▸ CROSS-REFERENCING THREAT DATA...</p>
+                    <p>▸ ANALYZING COMPROMISED CREDENTIALS...</p>
                 </div>
             </div>
 
             <div id="resultsSection" class="results-section hidden">
                 <div class="results-header">
-                    <h2>[SCAN_RESULTS]</h2>
+                    <div class="results-title">
+                        <h2>[SCAN_RESULTS]</h2>
+                        <div class="scan-type-indicator">
+                            <span id="scanTypeLabel" class="scan-type">TARGET_TYPE: [DETECTING...]</span>
+                        </div>
+                    </div>
                     <button id="newSearchBtn" class="new-search-btn">
                         <i class="fas fa-plus"></i>
                         NEW_SCAN
@@ -70,10 +93,16 @@
                     <i class="fas fa-exclamation-triangle error-icon"></i>
                     <h3>[ERROR_DETECTED]</h3>
                     <p id="errorMessage"></p>
-                    <button id="retryBtn" class="retry-btn">
-                        <i class="fas fa-redo"></i>
-                        RETRY_SCAN
-                    </button>
+                    <div class="error-actions">
+                        <button id="retryBtn" class="retry-btn">
+                            <i class="fas fa-redo"></i>
+                            RETRY_SCAN
+                        </button>
+                        <button id="newSearchBtn" class="new-search-btn">
+                            <i class="fas fa-plus"></i>
+                            NEW_SCAN
+                        </button>
+                    </div>
                 </div>
             </div>
         </main>

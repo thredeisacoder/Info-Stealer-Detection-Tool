@@ -1,4 +1,4 @@
-// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // ▓ CYBERSEC INFO STEALER DETECTION SYSTEM v2.1                           ▓
 // ▓ DARK WEB INTELLIGENCE GATHERING PROTOCOL                              ▓  
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -7,6 +7,7 @@
 const API_BASE_URL = '/api';
 const EMAIL_ENDPOINT = '/search-by-email?email=';
 const USERNAME_ENDPOINT = '/search-by-username?username=';
+const DOMAIN_ENDPOINT = '/search-by-domain?domain=';
 
 // DOM INTERFACE ELEMENTS
 const searchInput = document.getElementById('searchInput');
@@ -18,6 +19,7 @@ const errorSection = document.getElementById('errorSection');
 const errorMessage = document.getElementById('errorMessage');
 const newSearchBtn = document.getElementById('newSearchBtn');
 const retryBtn = document.getElementById('retryBtn');
+const scanTypeLabel = document.getElementById('scanTypeLabel');
 
 // GLOBAL SYSTEM VARIABLES
 let currentSearchQuery = '';
@@ -79,7 +81,14 @@ function updateSearchButton(value) {
         searchBtn.innerHTML = '<span class="btn-text">[STANDBY]</span><i class="fas fa-power-off btn-icon"></i>';
     } else {
         searchBtn.disabled = false;
-        const type = isEmail(value) ? 'EMAIL_TARGET' : 'USERNAME_TARGET';
+        let type;
+        if (isEmail(value)) {
+            type = 'EMAIL_TARGET';
+        } else if (isDomain(value)) {
+            type = 'DOMAIN_TARGET';
+        } else {
+            type = 'USERNAME_TARGET';
+        }
         searchBtn.innerHTML = `<span class="btn-text">[SCAN_${type}]</span><i class="fas fa-crosshairs btn-icon"></i>`;
     }
 }
@@ -88,6 +97,13 @@ function updateSearchButton(value) {
 function isEmail(input) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(input);
+}
+
+// ▓▓▓ DOMAIN VALIDATION PROTOCOL ▓▓▓
+function isDomain(input) {
+    // Domain regex: allows domains like example.com, sub.example.com, etc.
+    const domainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
+    return domainRegex.test(input) && !input.includes('@');
 }
 
 // ▓▓▓ MAIN SEARCH EXECUTION ▓▓▓
@@ -118,8 +134,9 @@ async function handleSearch() {
 // ▓▓▓ API COMMUNICATION PROTOCOL ▓▓▓
 async function performSearch(query) {
     const isEmailQuery = isEmail(query);
-    const endpoint = isEmailQuery ? EMAIL_ENDPOINT : USERNAME_ENDPOINT;
-    const param = isEmailQuery ? 'email' : 'username';
+    const isDomainQuery = isDomain(query);
+    const endpoint = isEmailQuery ? EMAIL_ENDPOINT : (isDomainQuery ? DOMAIN_ENDPOINT : USERNAME_ENDPOINT);
+    const param = isEmailQuery ? 'email' : (isDomainQuery ? 'domain' : 'username');
     const url = `${API_BASE_URL}${endpoint}${encodeURIComponent(query)}`;
     
     try {
@@ -186,7 +203,172 @@ function displayResults(data, query) {
     hideAllSections();
     resultsSection.classList.remove('hidden');
     
-    const queryType = isEmail(query) ? 'EMAIL_TARGET' : 'USERNAME_TARGET';
+    const queryType = isEmail(query) ? 'EMAIL_TARGET' : (isDomain(query) ? 'DOMAIN_TARGET' : 'USERNAME_TARGET');
+    
+    // Update scan type indicator
+    if (scanTypeLabel) {
+        scanTypeLabel.textContent = `TARGET_TYPE: [${queryType}]`;
+        
+        // Add appropriate styling based on scan type
+        scanTypeLabel.className = 'scan-type';
+        if (queryType === 'EMAIL_TARGET') {
+            scanTypeLabel.style.borderColor = '#0066ff';
+            scanTypeLabel.style.color = '#4080ff';
+            scanTypeLabel.style.background = 'rgba(0, 102, 255, 0.1)';
+        } else if (queryType === 'DOMAIN_TARGET') {
+            scanTypeLabel.style.borderColor = '#9900ff';
+            scanTypeLabel.style.color = '#bb40ff';
+            scanTypeLabel.style.background = 'rgba(153, 0, 255, 0.1)';
+        } else {
+            scanTypeLabel.style.borderColor = '#ff6600';
+            scanTypeLabel.style.color = '#ff8040';
+            scanTypeLabel.style.background = 'rgba(255, 102, 0, 0.1)';
+        }
+    }
+    
+    // Route to appropriate display function based on query type
+    if (isDomain(query)) {
+        displayDomainResults(data, query, queryType);
+    } else {
+        displayStealerResults(data, query, queryType);
+    }
+}
+
+// ▓▓▓ DOMAIN RESULTS DISPLAY SYSTEM ▓▓▓
+function displayDomainResults(data, query, queryType) {
+    const hasUsers = data.users && data.users > 0;
+    const hasEmployees = data.employees && data.employees > 0;
+    const hasThirdParties = data.third_parties && data.third_parties > 0;
+    
+    let html = '';
+    
+    // DOMAIN INTELLIGENCE SUMMARY
+    html += `
+        <div class="summary-stats">
+            <div class="stat-card">
+                <div class="stat-number">${data.total || 0}</div>
+                <div class="stat-label">TOTAL_COMPROMISED</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${data.users || 0}</div>
+                <div class="stat-label">USERS_FOUND</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${data.employees || 0}</div>
+                <div class="stat-label">EMPLOYEES_FOUND</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${data.third_parties || 0}</div>
+                <div class="stat-label">THIRD_PARTIES</div>
+            </div>
+        </div>
+    `;
+    
+    // DOMAIN THREAT ASSESSMENT
+    if (hasUsers || hasEmployees || hasThirdParties) {
+        html += `
+            <div class="alert alert-danger">
+                <i class="fas fa-globe-americas"></i>
+                <div>
+                    <strong>▓▓▓ DOMAIN_SECURITY_BREACH_DETECTED ▓▓▓</strong><br>
+                    TARGET: <strong>${query}</strong> [${queryType}]<br>
+                    STATUS: <strong>COMPROMISED</strong> • Domain found in stealer malware databases.<br>
+                    LAST_COMPROMISE: ${formatDate(data.last_user_compromised) || 'UNKNOWN'}<br>
+                    RECOMMENDATION: Investigate all associated accounts and enforce security protocols.
+                </div>
+            </div>
+        `;
+        
+        // COMPROMISED URLS ANALYSIS
+        if (data.data && data.data.clients_urls && data.data.clients_urls.length > 0) {
+            html += `
+                <div class="stealer-card">
+                    <div class="stealer-header">
+                        <div class="stealer-family">
+                            <i class="fas fa-link"></i> COMPROMISED_URLS_ANALYSIS
+                        </div>
+                    </div>
+                    <div class="stealer-details">
+            `;
+            
+            data.data.clients_urls.forEach(urlData => {
+                html += createDetailGroup('URL_TARGET', `${urlData.url} (${urlData.occurrence} occurrences)`, 'fas fa-external-link-alt');
+            });
+            
+            html += `</div></div>`;
+        }
+        
+        // STEALER FAMILIES BREAKDOWN
+        if (data.stealerFamilies && data.stealerFamilies.total > 0) {
+            html += `
+                <div class="stealer-card">
+                    <div class="stealer-header">
+                        <div class="stealer-family">
+                            <i class="fas fa-virus"></i> MALWARE_FAMILIES_BREAKDOWN [${data.stealerFamilies.total}]
+                        </div>
+                    </div>
+                    <div class="stealer-details">
+            `;
+            
+            Object.entries(data.stealerFamilies).forEach(([family, count]) => {
+                if (family !== 'total' && count > 0) {
+                    html += createDetailGroup('MALWARE_FAMILY', `${family.toUpperCase()}: ${count} instances`, 'fas fa-biohazard');
+                }
+            });
+            
+            html += `</div></div>`;
+        }
+        
+        // PASSWORD SECURITY ANALYSIS
+        if (data.userPasswords && data.userPasswords.has_stats) {
+            html += `
+                <div class="stealer-card">
+                    <div class="stealer-header">
+                        <div class="stealer-family">
+                            <i class="fas fa-key"></i> PASSWORD_SECURITY_ANALYSIS
+                        </div>
+                    </div>
+                    <div class="stealer-details">
+            `;
+            
+            if (data.userPasswords.totalPass) {
+                html += createDetailGroup('TOTAL_PASSWORDS', data.userPasswords.totalPass, 'fas fa-hashtag');
+            }
+            if (data.userPasswords.too_weak) {
+                html += createDetailGroup('TOO_WEAK', `${data.userPasswords.too_weak.qty} (${data.userPasswords.too_weak.perc}%)`, 'fas fa-exclamation-triangle');
+            }
+            if (data.userPasswords.weak) {
+                html += createDetailGroup('WEAK', `${data.userPasswords.weak.qty} (${data.userPasswords.weak.perc}%)`, 'fas fa-exclamation');
+            }
+            if (data.userPasswords.medium) {
+                html += createDetailGroup('MEDIUM', `${data.userPasswords.medium.qty} (${data.userPasswords.medium.perc}%)`, 'fas fa-minus');
+            }
+            if (data.userPasswords.strong) {
+                html += createDetailGroup('STRONG', `${data.userPasswords.strong.qty} (${data.userPasswords.strong.perc}%)`, 'fas fa-shield-alt');
+            }
+            
+            html += `</div></div>`;
+        }
+        
+    } else {
+        html += `
+            <div class="alert alert-success">
+                <i class="fas fa-shield-check"></i>
+                <div>
+                    <strong>▓▓▓ DOMAIN_CLEAN ▓▓▓</strong><br>
+                    TARGET: <strong>${query}</strong> [${queryType}]<br>
+                    STATUS: <strong>NOT_COMPROMISED</strong> • No records found in stealer databases.<br>
+                    ASSESSMENT: Domain appears secure from known malware.
+                </div>
+            </div>
+        `;
+    }
+    
+    resultsContent.innerHTML = html;
+}
+
+// ▓▓▓ STEALER RESULTS DISPLAY SYSTEM (RENAMED FROM displayResults) ▓▓▓
+function displayStealerResults(data, query, queryType) {
     const hasStealers = data.stealers && data.stealers.length > 0;
     
     let html = '';
@@ -416,6 +598,15 @@ function resetSearch() {
     searchInput.focus();
     updateSearchButton('');
     currentSearchQuery = '';
+    
+    // Reset scan type indicator
+    if (scanTypeLabel) {
+        scanTypeLabel.textContent = 'TARGET_TYPE: [DETECTING...]';
+        scanTypeLabel.style.borderColor = '#006600';
+        scanTypeLabel.style.color = '#40ff40';
+        scanTypeLabel.style.background = 'rgba(0, 255, 0, 0.1)';
+    }
+    
     console.log('%c▓▓▓ SYSTEM RESET - READY FOR NEW SCAN ▓▓▓', 'color: #00ff00; font-weight: bold;');
 }
 
